@@ -1,2 +1,9 @@
 input_data/
 env/
+env
+*.json
+*jsonl
+*.csv
+*.yml
+ner-finetuned/
+stance-finetuned/

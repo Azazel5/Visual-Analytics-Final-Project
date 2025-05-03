@@ -23,7 +23,7 @@ def merge_doccano_jsonls():
             "text": rec["text"],
             "metadata": rec["metadata"],
             "entities": rec["entities"],           # your corrected spans
-            "stance": stances[id_]["stance"]       # your corrected stance
+            "stance": stances[id_]["label"]       # your corrected stance
         }
         merged.append(merged_rec)
 
@@ -68,7 +68,7 @@ def main():
     print("Loaded gold data with {} records.".format(len(gold_data)))
 
     # 2. Initialize Hugging Face NER pipeline with a pre-trained model
-    model_name = "dslim/bert-base-NER"  # you can swap to another model
+    model_name = "ner-finetuned/"  # you can swap to another model
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForTokenClassification.from_pretrained(model_name)
     ner_pipeline = pipeline("ner", model=model, tokenizer=tokenizer, aggregation_strategy="simple")
@@ -78,11 +78,9 @@ def main():
 
     # Tokenize and produce gold_labels
     gold_labels = []
-    tokenized_inputs = []
     offset_mappings = []
 
     print("Tokenizing and aligning labels...")
-
     for item in gold_data:
         toks = tokenizer(item["text"], return_offsets_mapping=True)
         offsets = toks["offset_mapping"]
@@ -93,24 +91,20 @@ def main():
 
     # 4. Run NER inference
     print( "Running NER inference...")
-    # predictions = ner_pipeline(texts)
-
     predictions = []
     for txt in texts:
         preds = ner_pipeline(txt)
         predictions.append(preds)
 
-    print("Predictions length: ", len(predictions))
 
     pred_labels = []
-    print("Aligning predictions to BIO labels...")
-    
+
+    print("Aligning predictions to BIO labels...")    
     for preds, offsets in zip(predictions, offset_mappings):
         bio = preds_to_bio(preds, offsets)
         pred_labels.append(bio)
 
     # 5. Compute classification report
-    print("gold_labels and pred_labels lengths: ", len(gold_labels), len(pred_labels))
     print("Computing classification report...")
     report = classification_report(gold_labels, pred_labels)
     print("NER classification report on gold set:\n")
