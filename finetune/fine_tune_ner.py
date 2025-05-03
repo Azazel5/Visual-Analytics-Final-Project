@@ -12,7 +12,7 @@ from transformers import (
 from seqeval.metrics import classification_report
 
 # 1) Config
-DATA_FILE        = "phase1+2_gold.jsonl" 
+DATA_FILE = "phase1+2_gold.jsonl" 
 LABEL_LIST = ["PER", "ORG", "LOC", "EVENT"]
 MODEL_CHECKPOINT = "bert-base-cased"
 OUTPUT_DIR       = "ner-finetuned"

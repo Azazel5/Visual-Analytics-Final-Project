@@ -1,3 +1,5 @@
+# Python and NLP
+
 input_data/
 env/
 env
@@ -7,3 +9,8 @@ env
 *.yml
 ner-finetuned/
 stance-finetuned/
+
+
+# Frontend
+
+node_modules/
