@@ -36,7 +36,7 @@ def merge_doccano_jsonls():
 def align_labels_to_tokens(entities, tokens, offsets):
     labels = ["O"] * len(tokens)
     for ent in entities:
-        start, end, label = ent["start"], ent["end"], ent["label"]
+        start, end, label = ent["start_offset"], ent["end_offset"], ent["label"]
         for idx, (tok_start, tok_end) in enumerate(offsets):
             if tok_start == start:
                 labels[idx] = f"B-{label}"
@@ -45,7 +45,7 @@ def align_labels_to_tokens(entities, tokens, offsets):
     return labels
 
 # Function to align predicted entities to BIO token labels
-def preds_to_bio(preds, offsets, tokens):
+def preds_to_bio(preds, offsets):
     labels = ["O"] * len(offsets)
     for ent in preds:
         ent_label = ent["entity_group"]
@@ -82,7 +82,7 @@ def main():
     offset_mappings = []
 
     print("Tokenizing and aligning labels...")
-    
+
     for item in gold_data:
         toks = tokenizer(item["text"], return_offsets_mapping=True)
         offsets = toks["offset_mapping"]
@@ -93,17 +93,24 @@ def main():
 
     # 4. Run NER inference
     print( "Running NER inference...")
-    predictions = ner_pipeline(texts)
+    # predictions = ner_pipeline(texts)
+
+    predictions = []
+    for txt in texts:
+        preds = ner_pipeline(txt)
+        predictions.append(preds)
+
+    print("Predictions length: ", len(predictions))
 
     pred_labels = []
-
     print("Aligning predictions to BIO labels...")
     
-    for preds, offsets, toks in zip(predictions, offset_mappings, tokenized_inputs):
-        bio = preds_to_bio(preds, offsets, toks["input_ids"])
+    for preds, offsets in zip(predictions, offset_mappings):
+        bio = preds_to_bio(preds, offsets)
         pred_labels.append(bio)
 
     # 5. Compute classification report
+    print("gold_labels and pred_labels lengths: ", len(gold_labels), len(pred_labels))
     print("Computing classification report...")
     report = classification_report(gold_labels, pred_labels)
     print("NER classification report on gold set:\n")
