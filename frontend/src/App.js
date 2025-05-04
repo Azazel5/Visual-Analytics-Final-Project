@@ -1,5 +1,6 @@
 import sources from "./sources.json";
 import React, { useCallback, useState } from 'react';
+import Modal from './Modal';
 
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
@@ -13,6 +14,19 @@ function App() {
   const [minScore, setMinScore] = useState(0.8);
   const [limit, setLimit] = useState(25);
   const [loading, setLoading] = useState(false);
+
+  const [selected, setSelected] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const openModal = rec => {
+    setSelected(rec);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelected(null);
+  };
 
 
   const handleFetch = useCallback(async () => {
@@ -143,12 +157,13 @@ function App() {
       </div >
 
       {/* Results */}
-      < div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" >
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" >
         {results && results.length > 0 && results.map((rec, idx) => (
           <div
             key={idx}
             className="p-4 bg-white rounded-2xl shadow hover:shadow-lg transform 
             hover:-translate-y-1 transition duration-200 cursor-pointer"
+            onClick={() => openModal(rec)}
           >
             <p className="font-medium text-gray-800 mb-2 truncate">{rec.text}</p>
 
@@ -186,6 +201,8 @@ function App() {
         ))
         }
       </div >
+
+      <Modal isOpen={modalOpen} onClose={closeModal} record={selected} />
 
       {(!results || results.length === 0) && (
         <div className="flex w-full h-64 items-center justify-center flex-col mt-40">
