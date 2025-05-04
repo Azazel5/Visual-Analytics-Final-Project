@@ -28,7 +28,7 @@ function App() {
     setResults(data);
     setLoading(false);
 
-  },  [source, entities, stances, minScore, limit]);
+  }, [source, entities, stances, minScore, limit]);
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -151,15 +151,18 @@ function App() {
               >
                 {rec.stance.replace('STANCE_', '')}
               </span>
-              
 
-              {rec.spans && (
-                  <span
-                    key={`${rec.metadata.filename}-${rec.spans[0].start}`}
-                    className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800"
-                  >
-                    {rec.spans[0].label}
-                  </span>
+
+              {rec.spans && rec.spans.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {rec.spans.map((s, idx) => (
+                    <span
+                      key={`${rec.metadata.filename}-${s.start}-${idx}`}
+                      className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                      {s.label}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
 

@@ -80,6 +80,7 @@ def get_predictions():
             continue
 
         # 4) entity filter: pass if any span.label matches
+        print("Ent is: ", ent)
         if ent:
             if ent not in ENTITY_NORMALIZER:
                 abort(400, f"Unknown entity label: {ent}")
@@ -87,10 +88,15 @@ def get_predictions():
         else:
             normalized_ent = None
 
+        print( "Normalized ent is: ", normalized_ent)
         if normalized_ent:
             spans = rec.get("spans", [])
+            print("Spans are: ", spans)
             if not any(s.get("label") == normalized_ent for s in spans):
+                print("Skipping over entity filter")
                 continue
+            else:
+                print("it found one match....")
 
         results.append(rec)
         if len(results) >= limit:
