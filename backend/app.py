@@ -29,7 +29,6 @@ def load_predictions(path):
     return preds
 
 all_predictions = load_predictions(JSONL_PATH)
-print(f"→ Loaded {len(all_predictions)} records from {JSONL_PATH}")
 
 # ——————————————————————————————————————————
 # 3) FLASK APP
@@ -42,24 +41,28 @@ def get_predictions():
     """
     Query parameters:
       - source     : exact match on metadata.source
-      - entity     : one of VALID_ENTITY_LABELS
-      - stance     : one of VALID_STANCES
+      - entities     : one of VALID_ENTITY_LABELS
+      - stances     : one of VALID_STANCES
       - min_score  : float (0-1), default 0
       - limit      : int, max number of records to return (default 100)
     """
     src    = request.args.get("source", type=str)
-    ent    = request.args.get("entity", type=str)
-    stance = request.args.get("stance", type=str)
+    ent    = request.args.get("entities", type=str)
+    stance = request.args.get("stances", type=str)
     min_sc = request.args.get("min_score", default=0.0, type=float)
     limit  = request.args.get("limit", default=100, type=int)
+    ENTITY_NORMALIZER = {
+    "PER":   "PERSON",
+    "LOC":   "LOC",
+    "ORG":   "ORG",
+    "EVENT": "EVENT",
+}
 
     # validate
     if ent and ent not in VALID_ENTITY_LABELS:
         abort(400, f"Unknown entity label: {ent}")
     if stance and stance not in VALID_STANCES:
         abort(400, f"Unknown stance: {stance}")
-    if not (0.0 <= min_sc <= 1.0):
-        abort(400, f"min_score must be between 0 and 1")
 
     # filter in‑memory
     results = []
@@ -78,8 +81,15 @@ def get_predictions():
 
         # 4) entity filter: pass if any span.label matches
         if ent:
+            if ent not in ENTITY_NORMALIZER:
+                abort(400, f"Unknown entity label: {ent}")
+            normalized_ent = ENTITY_NORMALIZER[ent]
+        else:
+            normalized_ent = None
+
+        if normalized_ent:
             spans = rec.get("spans", [])
-            if not any(s.get("label") == ent for s in spans):
+            if not any(s.get("label") == normalized_ent for s in spans):
                 continue
 
         results.append(rec)

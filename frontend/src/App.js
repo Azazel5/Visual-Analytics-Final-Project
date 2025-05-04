@@ -1,32 +1,34 @@
 import sources from "./sources.json";
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 
 function App() {
   const [results, setResults] = useState([]);
-  const [source, setSource] = useState('');
-  const [entity, setEntity] = useState('');
-  const [stance, setStance] = useState('');
-  const [minScore, setMinScore] = useState(0.5);
-  const [limit, setLimit] = useState(50);
+  const [source, setSource] = useState('All News Today');
+  const [entities, setEntities] = useState('PER');
+  const [stances, setStances] = useState('STANCE_POS');
+  const [minScore, setMinScore] = useState(0.8);
+  const [limit, setLimit] = useState(25);
   const [loading, setLoading] = useState(false);
 
 
-  const handleFetch = async () => {
+  const handleFetch = useCallback(async () => {
     setLoading(true);
+
     const qs = new URLSearchParams({
       source,
-      entity,
-      stance,
+      entities,
+      stances,
       min_score: minScore,
       limit,
     });
+
     const res = await fetch(`http://127.0.0.1:5005/predictions?${qs}`);
     const data = await res.json();
-    console.log("Data is: ", data);
     setResults(data);
     setLoading(false);
-  };
+
+  },  [source, entities, stances, minScore, limit]);
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -35,7 +37,7 @@ function App() {
       </h1>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center justify-center gap-6 mb-8">
+      <div className="flex flex-wrap items-center gap-6 mb-8">
         {/* Source */}
         <div className="flex flex-col">
           {/* <label className="text-sm font-medium text-gray-700">Source</label> */}
@@ -64,8 +66,8 @@ function App() {
         <div className="flex flex-col">
           <label className="text-sm font-medium text-gray-700">Entity</label>
           <select
-            value={entity}
-            onChange={(e) => setEntity(e.target.value)}
+            value={entities}
+            onChange={(e) => setEntities(e.target.value)}
             className="mt-1 w-48 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
           >
             <option value="">Any</option>
@@ -79,8 +81,8 @@ function App() {
         <div className="flex flex-col">
           <label className="text-sm font-medium text-gray-700">Stance</label>
           <select
-            value={stance}
-            onChange={(e) => setStance(e.target.value)}
+            value={stances}
+            onChange={(e) => setStances(e.target.value)}
             className="mt-1 w-48 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
           >
             <option value="">Any</option>
@@ -149,6 +151,7 @@ function App() {
               >
                 {rec.stance.replace('STANCE_', '')}
               </span>
+              
 
               {rec.spans && (
                   <span
