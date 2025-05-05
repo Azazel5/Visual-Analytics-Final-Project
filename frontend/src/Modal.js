@@ -73,7 +73,7 @@ function Modal({ isOpen, onClose, record }) {
                     <mark className="bg-yellow-100 text-yellow-800">
                       {text.slice(s.start, s.end)}
                     </mark>”{" "}
-                    (indices: {s.start}–{s.end})
+                    (indices: {s.start}-{s.end})
                   </li>
                 ))}
               </ul>

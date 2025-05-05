@@ -42,6 +42,15 @@ function App() {
 
     const res = await fetch(`http://127.0.0.1:5005/predictions?${qs}`);
     const data = await res.json();
+    
+    data.sort((a, b) => {
+      const srcA = a.metadata.source.toLowerCase();
+      const srcB = b.metadata.source.toLowerCase();
+      if (srcA < srcB) return -1;
+      if (srcA > srcB) return 1;
+      return 0;
+    });
+    
     setResults(data);
     setLoading(false);
 
